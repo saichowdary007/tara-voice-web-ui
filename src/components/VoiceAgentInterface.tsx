@@ -4,7 +4,7 @@ import { Mic, MicOff, Type, Volume2, VolumeX } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { useToast } from '@/hooks/use-toast';
-import VoiceGlobe from './VoiceGlobe';
+import ThreeGlobe from './ThreeGlobe';
 
 type AgentStatus = 'idle' | 'connecting' | 'calibrating' | 'listening' | 'thinking' | 'speaking';
 
@@ -162,8 +162,8 @@ const VoiceAgentInterface = () => {
 
       {/* Main Voice Interface */}
       <div className="flex-1 flex flex-col items-center justify-center p-8 space-y-8">
-        {/* Voice Globe */}
-        <VoiceGlobe status={status} isRecording={isRecording} />
+        {/* Three.js Globe */}
+        <ThreeGlobe status={status} isRecording={isRecording} />
         
         {/* Status Text */}
         <div className="text-center space-y-2 max-w-md">
