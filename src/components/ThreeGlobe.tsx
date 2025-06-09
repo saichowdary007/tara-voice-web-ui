@@ -9,59 +9,131 @@ interface ThreeGlobeProps {
   isRecording: boolean;
 }
 
-const AnimatedGlobe = ({ status, isRecording }: ThreeGlobeProps) => {
-  const globeRef = useRef<THREE.Mesh>(null);
-  const wireframeRef = useRef<THREE.Mesh>(null);
-  const particlesRef = useRef<THREE.Points>(null);
+const AudioVisualizer = ({ status, isRecording }: ThreeGlobeProps) => {
+  const meshRef = useRef<THREE.Mesh>(null);
+  const analyserRef = useRef<AnalyserNode | null>(null);
 
-  // Create particle system
-  const particles = useMemo(() => {
-    const positions = new Float32Array(1000 * 3);
-    for (let i = 0; i < 1000; i++) {
-      const radius = 2 + Math.random() * 2;
-      const theta = Math.random() * Math.PI * 2;
-      const phi = Math.random() * Math.PI;
+  // Create audio visualizer bars
+  const bars = useMemo(() => {
+    const barCount = 64;
+    const positions: number[] = [];
+    const colors: number[] = [];
+    
+    for (let i = 0; i < barCount; i++) {
+      const angle = (i / barCount) * Math.PI * 2;
+      const radius = 3;
       
-      positions[i * 3] = radius * Math.sin(phi) * Math.cos(theta);
-      positions[i * 3 + 1] = radius * Math.sin(phi) * Math.sin(theta);
-      positions[i * 3 + 2] = radius * Math.cos(phi);
+      // Position bars in a circle
+      const x = Math.cos(angle) * radius;
+      const z = Math.sin(angle) * radius;
+      const y = 0;
+      
+      positions.push(x, y, z);
+      
+      // Color based on status
+      if (status === 'listening') {
+        colors.push(0.13, 0.77, 0.37); // Green
+      } else if (status === 'thinking') {
+        colors.push(0.98, 0.75, 0.15); // Yellow
+      } else if (status === 'speaking') {
+        colors.push(0.54, 0.36, 0.96); // Purple
+      } else {
+        colors.push(0.54, 0.36, 0.96); // Default purple
+      }
     }
-    return positions;
-  }, []);
+    
+    return { positions, colors, count: barCount };
+  }, [status]);
 
   useFrame((state) => {
-    if (!globeRef.current || !wireframeRef.current || !particlesRef.current) return;
+    if (!meshRef.current) return;
 
     const time = state.clock.getElapsedTime();
     
-    // Base rotation
-    globeRef.current.rotation.y = time * 0.2;
-    wireframeRef.current.rotation.y = time * 0.15;
-    wireframeRef.current.rotation.x = time * 0.1;
-
-    // Status-based animations
-    switch (status) {
-      case 'listening':
-        globeRef.current.scale.setScalar(1 + Math.sin(time * 4) * 0.1);
-        particlesRef.current.rotation.y = time * 0.5;
-        break;
-      case 'thinking':
-        globeRef.current.rotation.x = Math.sin(time * 2) * 0.2;
-        wireframeRef.current.scale.setScalar(1 + Math.sin(time * 3) * 0.05);
-        break;
-      case 'speaking':
-        globeRef.current.scale.setScalar(1 + Math.sin(time * 6) * 0.15);
-        particlesRef.current.rotation.y = time * 1;
-        particlesRef.current.rotation.x = time * 0.5;
-        break;
-      case 'connecting':
-      case 'calibrating':
-        globeRef.current.rotation.z = time * 0.3;
-        break;
-      default:
-        globeRef.current.scale.setScalar(1);
-        particlesRef.current.rotation.y = time * 0.1;
+    // Animate the visualizer based on status
+    if (status === 'listening' || status === 'speaking') {
+      // Simulate audio data with sine waves
+      const children = meshRef.current.children;
+      children.forEach((child, i) => {
+        if (child instanceof THREE.Mesh) {
+          const frequency = 0.5 + (i * 0.1);
+          const amplitude = status === 'speaking' ? 2 : 1;
+          const height = Math.abs(Math.sin(time * frequency)) * amplitude + 0.1;
+          child.scale.y = height;
+          child.position.y = (height - 1) / 2;
+        }
+      });
+    } else if (status === 'thinking') {
+      // Gentle pulsing animation
+      const children = meshRef.current.children;
+      children.forEach((child, i) => {
+        if (child instanceof THREE.Mesh) {
+          const offset = i * 0.1;
+          const height = 0.5 + Math.sin(time * 2 + offset) * 0.3;
+          child.scale.y = height;
+          child.position.y = (height - 1) / 2;
+        }
+      });
+    } else {
+      // Reset to default state
+      const children = meshRef.current.children;
+      children.forEach((child) => {
+        if (child instanceof THREE.Mesh) {
+          child.scale.y = 0.1;
+          child.position.y = -0.45;
+        }
+      });
     }
+
+    // Rotate the entire visualizer
+    meshRef.current.rotation.y = time * 0.2;
+  });
+
+  return (
+    <group ref={meshRef}>
+      {Array.from({ length: bars.count }).map((_, i) => {
+        const angle = (i / bars.count) * Math.PI * 2;
+        const radius = 3;
+        const x = Math.cos(angle) * radius;
+        const z = Math.sin(angle) * radius;
+        
+        return (
+          <mesh key={i} position={[x, 0, z]}>
+            <boxGeometry args={[0.1, 1, 0.1]} />
+            <meshPhongMaterial 
+              color={new THREE.Color(
+                bars.colors[i * 3],
+                bars.colors[i * 3 + 1],
+                bars.colors[i * 3 + 2]
+              )}
+              emissive={new THREE.Color(
+                bars.colors[i * 3] * 0.2,
+                bars.colors[i * 3 + 1] * 0.2,
+                bars.colors[i * 3 + 2] * 0.2
+              )}
+            />
+          </mesh>
+        );
+      })}
+    </group>
+  );
+};
+
+const CentralGlobe = ({ status }: { status: string }) => {
+  const globeRef = useRef<THREE.Mesh>(null);
+
+  useFrame((state) => {
+    if (!globeRef.current) return;
+
+    const time = state.clock.getElapsedTime();
+    
+    // Rotate the globe
+    globeRef.current.rotation.y = time * 0.3;
+    globeRef.current.rotation.x = Math.sin(time * 0.5) * 0.1;
+
+    // Scale based on status
+    const targetScale = status === 'speaking' ? 1.2 : status === 'listening' ? 1.1 : 1;
+    globeRef.current.scale.lerp(new THREE.Vector3(targetScale, targetScale, targetScale), 0.1);
   });
 
   const getGlobeColor = () => {
@@ -75,70 +147,23 @@ const AnimatedGlobe = ({ status, isRecording }: ThreeGlobeProps) => {
     }
   };
 
-  const getEmissionIntensity = () => {
-    switch (status) {
-      case 'listening': return 0.3;
-      case 'thinking': return 0.2;
-      case 'speaking': return 0.4;
-      default: return 0.1;
-    }
-  };
-
   return (
-    <>
-      {/* Main Globe */}
-      <Sphere ref={globeRef} args={[1.5, 64, 64]}>
-        <meshPhysicalMaterial
-          color={getGlobeColor()}
-          transparent
-          opacity={0.8}
-          emissive={getGlobeColor()}
-          emissiveIntensity={getEmissionIntensity()}
-          roughness={0.1}
-          metalness={0.1}
-        />
-      </Sphere>
-
-      {/* Wireframe Overlay */}
-      <Sphere ref={wireframeRef} args={[1.6, 32, 32]}>
-        <meshBasicMaterial
-          color={getGlobeColor()}
-          wireframe
-          transparent
-          opacity={0.3}
-        />
-      </Sphere>
-
-      {/* Particle System */}
-      <points ref={particlesRef}>
-        <bufferGeometry>
-          <bufferAttribute
-            attach="attributes-position"
-            count={particles.length / 3}
-            array={particles}
-            itemSize={3}
-          />
-        </bufferGeometry>
-        <pointsMaterial
-          color={getGlobeColor()}
-          size={0.02}
-          transparent
-          opacity={0.6}
-        />
-      </points>
-
-      {/* Ambient lighting */}
-      <ambientLight intensity={0.4} />
-      <pointLight position={[10, 10, 10]} intensity={1} />
-      <pointLight position={[-10, -10, -10]} intensity={0.5} color="#8b5cf6" />
-    </>
+    <Sphere ref={globeRef} args={[1, 32, 32]}>
+      <meshPhongMaterial
+        color={getGlobeColor()}
+        transparent
+        opacity={0.8}
+        emissive={getGlobeColor()}
+        emissiveIntensity={0.2}
+      />
+    </Sphere>
   );
 };
 
 const ThreeGlobe = ({ status, isRecording }: ThreeGlobeProps) => {
   return (
     <div className="w-64 h-64 mx-auto">
-      <Canvas camera={{ position: [0, 0, 6], fov: 45 }}>
+      <Canvas camera={{ position: [0, 2, 8], fov: 45 }}>
         <Stars 
           radius={50} 
           depth={50} 
@@ -147,7 +172,18 @@ const ThreeGlobe = ({ status, isRecording }: ThreeGlobeProps) => {
           saturation={0.5} 
           fade 
         />
-        <AnimatedGlobe status={status} isRecording={isRecording} />
+        
+        {/* Central Globe */}
+        <CentralGlobe status={status} />
+        
+        {/* Audio Visualizer */}
+        <AudioVisualizer status={status} isRecording={isRecording} />
+        
+        {/* Lighting */}
+        <ambientLight intensity={0.4} />
+        <pointLight position={[10, 10, 10]} intensity={1} />
+        <pointLight position={[-10, -10, -10]} intensity={0.5} color="#8b5cf6" />
+        
         <OrbitControls 
           enableZoom={false} 
           enablePan={false}
