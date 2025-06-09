@@ -10,8 +10,7 @@ interface ThreeGlobeProps {
 }
 
 const AudioVisualizer = ({ status, isRecording }: ThreeGlobeProps) => {
-  const meshRef = useRef<THREE.Mesh>(null);
-  const analyserRef = useRef<AnalyserNode | null>(null);
+  const groupRef = useRef<THREE.Group>(null);
 
   // Create audio visualizer bars
   const bars = useMemo(() => {
@@ -46,14 +45,14 @@ const AudioVisualizer = ({ status, isRecording }: ThreeGlobeProps) => {
   }, [status]);
 
   useFrame((state) => {
-    if (!meshRef.current) return;
+    if (!groupRef.current) return;
 
     const time = state.clock.getElapsedTime();
     
     // Animate the visualizer based on status
     if (status === 'listening' || status === 'speaking') {
       // Simulate audio data with sine waves
-      const children = meshRef.current.children;
+      const children = groupRef.current.children;
       children.forEach((child, i) => {
         if (child instanceof THREE.Mesh) {
           const frequency = 0.5 + (i * 0.1);
@@ -65,7 +64,7 @@ const AudioVisualizer = ({ status, isRecording }: ThreeGlobeProps) => {
       });
     } else if (status === 'thinking') {
       // Gentle pulsing animation
-      const children = meshRef.current.children;
+      const children = groupRef.current.children;
       children.forEach((child, i) => {
         if (child instanceof THREE.Mesh) {
           const offset = i * 0.1;
@@ -76,7 +75,7 @@ const AudioVisualizer = ({ status, isRecording }: ThreeGlobeProps) => {
       });
     } else {
       // Reset to default state
-      const children = meshRef.current.children;
+      const children = groupRef.current.children;
       children.forEach((child) => {
         if (child instanceof THREE.Mesh) {
           child.scale.y = 0.1;
@@ -86,11 +85,11 @@ const AudioVisualizer = ({ status, isRecording }: ThreeGlobeProps) => {
     }
 
     // Rotate the entire visualizer
-    meshRef.current.rotation.y = time * 0.2;
+    groupRef.current.rotation.y = time * 0.2;
   });
 
   return (
-    <group ref={meshRef}>
+    <group ref={groupRef}>
       {Array.from({ length: bars.count }).map((_, i) => {
         const angle = (i / bars.count) * Math.PI * 2;
         const radius = 3;
@@ -133,7 +132,8 @@ const CentralGlobe = ({ status }: { status: string }) => {
 
     // Scale based on status
     const targetScale = status === 'speaking' ? 1.2 : status === 'listening' ? 1.1 : 1;
-    globeRef.current.scale.lerp(new THREE.Vector3(targetScale, targetScale, targetScale), 0.1);
+    const currentScale = globeRef.current.scale;
+    currentScale.lerp(new THREE.Vector3(targetScale, targetScale, targetScale), 0.1);
   });
 
   const getGlobeColor = () => {
