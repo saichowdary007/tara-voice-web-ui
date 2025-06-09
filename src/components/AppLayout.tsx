@@ -2,8 +2,8 @@
 import React, { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Avatar, AvatarFallback } from '@/components/ui/avatar';
-import { Bot, User, LogOut, MessageCircle, Settings } from 'lucide-react';
-import ConversationInterface from './ConversationInterface';
+import { Bot, User, LogOut, Mic, Settings } from 'lucide-react';
+import VoiceAgentInterface from './VoiceAgentInterface';
 import UserProfile from './UserProfile';
 import { useToast } from '@/hooks/use-toast';
 
@@ -11,10 +11,10 @@ interface AppLayoutProps {
   onLogout: () => void;
 }
 
-type ActiveView = 'chat' | 'profile' | 'settings';
+type ActiveView = 'voice' | 'profile' | 'settings';
 
 const AppLayout = ({ onLogout }: AppLayoutProps) => {
-  const [activeView, setActiveView] = useState<ActiveView>('chat');
+  const [activeView, setActiveView] = useState<ActiveView>('voice');
   const { toast } = useToast();
 
   const handleLogout = () => {
@@ -27,8 +27,8 @@ const AppLayout = ({ onLogout }: AppLayoutProps) => {
 
   const renderActiveView = () => {
     switch (activeView) {
-      case 'chat':
-        return <ConversationInterface />;
+      case 'voice':
+        return <VoiceAgentInterface />;
       case 'profile':
         return <UserProfile />;
       case 'settings':
@@ -37,12 +37,12 @@ const AppLayout = ({ onLogout }: AppLayoutProps) => {
             <div className="text-center text-muted-foreground">
               <Settings className="mx-auto mb-4 h-12 w-12" />
               <h3 className="text-lg font-semibold mb-2">Settings</h3>
-              <p>Settings panel coming soon...</p>
+              <p>Voice settings and preferences coming soon...</p>
             </div>
           </div>
         );
       default:
-        return <ConversationInterface />;
+        return <VoiceAgentInterface />;
     }
   };
 
@@ -69,16 +69,16 @@ const AppLayout = ({ onLogout }: AppLayoutProps) => {
         <div className="flex-1 p-2">
           <nav className="space-y-2">
             <Button
-              variant={activeView === 'chat' ? 'secondary' : 'ghost'}
+              variant={activeView === 'voice' ? 'secondary' : 'ghost'}
               className={`w-full justify-start ${
-                activeView === 'chat' 
+                activeView === 'voice' 
                   ? 'bg-ai-purple/10 text-ai-purple border-ai-purple/20' 
                   : 'hover:bg-secondary'
               }`}
-              onClick={() => setActiveView('chat')}
+              onClick={() => setActiveView('voice')}
             >
-              <MessageCircle className="h-4 w-4" />
-              <span className="hidden lg:inline ml-2">Chat</span>
+              <Mic className="h-4 w-4" />
+              <span className="hidden lg:inline ml-2">Voice Chat</span>
             </Button>
             
             <Button
