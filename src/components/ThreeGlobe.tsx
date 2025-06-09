@@ -15,33 +15,22 @@ const AudioVisualizer = ({ status, isRecording }: ThreeGlobeProps) => {
   // Create audio visualizer bars
   const bars = useMemo(() => {
     const barCount = 64;
-    const positions: number[] = [];
-    const colors: number[] = [];
+    const barData: Array<{ color: string; emissive: string }> = [];
     
     for (let i = 0; i < barCount; i++) {
-      const angle = (i / barCount) * Math.PI * 2;
-      const radius = 3;
-      
-      // Position bars in a circle
-      const x = Math.cos(angle) * radius;
-      const z = Math.sin(angle) * radius;
-      const y = 0;
-      
-      positions.push(x, y, z);
-      
       // Color based on status
       if (status === 'listening') {
-        colors.push(0.13, 0.77, 0.37); // Green
+        barData.push({ color: '#22c55e', emissive: '#0a4d1a' }); // Green
       } else if (status === 'thinking') {
-        colors.push(0.98, 0.75, 0.15); // Yellow
+        barData.push({ color: '#fbbf24', emissive: '#7c2d12' }); // Yellow
       } else if (status === 'speaking') {
-        colors.push(0.54, 0.36, 0.96); // Purple
+        barData.push({ color: '#8b5cf6', emissive: '#3730a3' }); // Purple
       } else {
-        colors.push(0.54, 0.36, 0.96); // Default purple
+        barData.push({ color: '#8b5cf6', emissive: '#3730a3' }); // Default purple
       }
     }
     
-    return { positions, colors, count: barCount };
+    return { data: barData, count: barCount };
   }, [status]);
 
   useFrame((state) => {
@@ -95,21 +84,14 @@ const AudioVisualizer = ({ status, isRecording }: ThreeGlobeProps) => {
         const radius = 3;
         const x = Math.cos(angle) * radius;
         const z = Math.sin(angle) * radius;
+        const barInfo = bars.data[i];
         
         return (
           <mesh key={i} position={[x, 0, z]}>
             <boxGeometry args={[0.1, 1, 0.1]} />
             <meshPhongMaterial 
-              color={new THREE.Color(
-                bars.colors[i * 3],
-                bars.colors[i * 3 + 1],
-                bars.colors[i * 3 + 2]
-              )}
-              emissive={new THREE.Color(
-                bars.colors[i * 3] * 0.2,
-                bars.colors[i * 3 + 1] * 0.2,
-                bars.colors[i * 3 + 2] * 0.2
-              )}
+              color={barInfo.color}
+              emissive={barInfo.emissive}
             />
           </mesh>
         );
@@ -147,13 +129,24 @@ const CentralGlobe = ({ status }: { status: string }) => {
     }
   };
 
+  const getEmissiveColor = () => {
+    switch (status) {
+      case 'listening': return '#0a4d1a';
+      case 'thinking': return '#7c2d12';
+      case 'speaking': return '#3730a3';
+      case 'connecting':
+      case 'calibrating': return '#1e3a8a';
+      default: return '#3730a3';
+    }
+  };
+
   return (
     <Sphere ref={globeRef} args={[1, 32, 32]}>
       <meshPhongMaterial
         color={getGlobeColor()}
         transparent
         opacity={0.8}
-        emissive={getGlobeColor()}
+        emissive={getEmissiveColor()}
         emissiveIntensity={0.2}
       />
     </Sphere>
