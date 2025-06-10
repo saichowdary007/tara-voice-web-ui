@@ -15,18 +15,30 @@ const AudioVisualizer = ({ status, isRecording }: ThreeGlobeProps) => {
   // Create audio visualizer bars
   const bars = useMemo(() => {
     const barCount = 64;
-    const barData: Array<{ color: string; emissive: string }> = [];
+    const barData: Array<{ color: THREE.Color; emissive: THREE.Color }> = [];
     
     for (let i = 0; i < barCount; i++) {
       // Color based on status
       if (status === 'listening') {
-        barData.push({ color: '#22c55e', emissive: '#0a4d1a' }); // Green
+        barData.push({ 
+          color: new THREE.Color('#22c55e'), 
+          emissive: new THREE.Color('#0a4d1a') 
+        }); // Green
       } else if (status === 'thinking') {
-        barData.push({ color: '#fbbf24', emissive: '#7c2d12' }); // Yellow
+        barData.push({ 
+          color: new THREE.Color('#fbbf24'), 
+          emissive: new THREE.Color('#7c2d12') 
+        }); // Yellow
       } else if (status === 'speaking') {
-        barData.push({ color: '#8b5cf6', emissive: '#3730a3' }); // Purple
+        barData.push({ 
+          color: new THREE.Color('#8b5cf6'), 
+          emissive: new THREE.Color('#3730a3') 
+        }); // Purple
       } else {
-        barData.push({ color: '#8b5cf6', emissive: '#3730a3' }); // Default purple
+        barData.push({ 
+          color: new THREE.Color('#8b5cf6'), 
+          emissive: new THREE.Color('#3730a3') 
+        }); // Default purple
       }
     }
     
@@ -120,23 +132,23 @@ const CentralGlobe = ({ status }: { status: string }) => {
 
   const getGlobeColor = () => {
     switch (status) {
-      case 'listening': return '#22c55e';
-      case 'thinking': return '#fbbf24';
-      case 'speaking': return '#8b5cf6';
+      case 'listening': return new THREE.Color('#22c55e');
+      case 'thinking': return new THREE.Color('#fbbf24');
+      case 'speaking': return new THREE.Color('#8b5cf6');
       case 'connecting':
-      case 'calibrating': return '#3b82f6';
-      default: return '#8b5cf6';
+      case 'calibrating': return new THREE.Color('#3b82f6');
+      default: return new THREE.Color('#8b5cf6');
     }
   };
 
   const getEmissiveColor = () => {
     switch (status) {
-      case 'listening': return '#0a4d1a';
-      case 'thinking': return '#7c2d12';
-      case 'speaking': return '#3730a3';
+      case 'listening': return new THREE.Color('#0a4d1a');
+      case 'thinking': return new THREE.Color('#7c2d12');
+      case 'speaking': return new THREE.Color('#3730a3');
       case 'connecting':
-      case 'calibrating': return '#1e3a8a';
-      default: return '#3730a3';
+      case 'calibrating': return new THREE.Color('#1e3a8a');
+      default: return new THREE.Color('#3730a3');
     }
   };
 
