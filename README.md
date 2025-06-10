@@ -11,6 +11,17 @@ A modern, responsive web UI for the Tara Voice Agent with real-time speech proce
 - **User Profile Learning**: Remembers facts about the user for personalized interactions
 - **Responsive Web UI**: Modern interface with real-time status indicators
 
+## Project Structure
+
+The project is organized into two main directories:
+
+```
+tara-voice-web-ui/
+├── frontend/         # React/Vite frontend application
+├── backend/          # Python FastAPI backend services
+└── run.sh            # Script to run both frontend and backend
+```
+
 ## Architecture
 
 The application consists of two main components:
@@ -56,6 +67,7 @@ The application consists of two main components:
 
 1. Install frontend dependencies:
    ```bash
+   cd frontend
    npm install
    ```
 
@@ -78,6 +90,7 @@ python api.py
 
 **Frontend:**
 ```bash
+cd frontend
 npm run dev
 ```
 
@@ -106,9 +119,9 @@ The application will be available at:
 
 ### Frontend Structure
 
-- `src/components/VoiceAgent.tsx`: Main voice agent component
-- `src/pages`: React Router pages
-- `src/lib`: Utility functions and API services
+- `frontend/src/components/VoiceAgent.tsx`: Main voice agent component
+- `frontend/src/pages`: React Router pages
+- `frontend/src/lib`: Utility functions and API services
 
 ## Testing
 
