@@ -2,7 +2,7 @@
 
 # Start backend server
 echo "Starting backend server..."
-cd backend
+cd ../frontendckend
 python api.py &
 BACKEND_PID=$!
 
@@ -11,7 +11,7 @@ sleep 2
 
 # Change to frontend directory and start frontend
 echo "Starting frontend..."
-cd ..
+cd ../frontend
 npm run dev &
 FRONTEND_PID=$!
 
