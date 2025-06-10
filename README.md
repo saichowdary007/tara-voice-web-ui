@@ -1,73 +1,119 @@
-# Welcome to your Lovable project
+# Tara Voice Agent
 
-## Project info
+A modern, responsive web UI for the Tara Voice Agent with real-time speech processing, natural language understanding, and conversational memory.
 
-**URL**: https://lovable.dev/projects/e7a43478-cf0f-4589-8e8a-05fdb1d45271
+## Features
 
-## How can I edit this code?
+- **Ultra-fast Response Time**: Sub-500ms round-trip latency for a true conversational experience
+- **Voice-First Interface**: Natural voice interaction with barge-in capability
+- **Supabase Integration**: Secure authentication and user profiles
+- **Conversation Memory**: Maintains context across conversations
+- **User Profile Learning**: Remembers facts about the user for personalized interactions
+- **Responsive Web UI**: Modern interface with real-time status indicators
 
-There are several ways of editing your application.
+## Architecture
 
-**Use Lovable**
+The application consists of two main components:
 
-Simply visit the [Lovable Project](https://lovable.dev/projects/e7a43478-cf0f-4589-8e8a-05fdb1d45271) and start prompting.
+1. **Backend (Python FastAPI)**: Handles authentication, speech-to-text, AI processing, and text-to-speech
+2. **Frontend (React/Vite)**: Provides the user interface with WebSocket communication
 
-Changes made via Lovable will be committed automatically to this repo.
+## Setup
 
-**Use your preferred IDE**
+### Prerequisites
 
-If you want to work locally using your own IDE, you can clone this repo and push changes. Pushed changes will also be reflected in Lovable.
+- Python 3.9 or higher
+- Node.js 18 or higher
+- npm or yarn
+- Supabase account (for authentication and storage)
 
-The only requirement is having Node.js & npm installed - [install with nvm](https://github.com/nvm-sh/nvm#installing-and-updating)
+### Backend Setup
 
-Follow these steps:
+1. Install Python dependencies:
+   ```bash
+   cd backend
+   pip install -r requirements.txt
+   ```
 
-```sh
-# Step 1: Clone the repository using the project's Git URL.
-git clone <YOUR_GIT_URL>
+2. Set up environment variables:
+   ```bash
+   # Create a .env file in the backend directory
+   echo "SUPABASE_URL=your-supabase-url" > backend/.env
+   echo "SUPABASE_KEY=your-supabase-key" >> backend/.env
+   echo "SUPABASE_JWT_SECRET=your-jwt-secret" >> backend/.env
+   
+   # Optional: Add LLM API keys if using OpenAI or other providers
+   echo "OPENAI_API_KEY=your-openai-key" >> backend/.env
+   ```
 
-# Step 2: Navigate to the project directory.
-cd <YOUR_PROJECT_NAME>
+3. Initialize Supabase tables (run once):
+   ```bash
+   cd backend
+   python setup_supabase.py
+   ```
 
-# Step 3: Install the necessary dependencies.
-npm i
+### Frontend Setup
 
-# Step 4: Start the development server with auto-reloading and an instant preview.
+1. Install frontend dependencies:
+   ```bash
+   npm install
+   ```
+
+## Running the Application
+
+You can run both the backend and frontend together using the provided script:
+
+```bash
+chmod +x run.sh  # Make the script executable (first time only)
+./run.sh
+```
+
+Or run them separately:
+
+**Backend:**
+```bash
+cd backend
+python api.py
+```
+
+**Frontend:**
+```bash
 npm run dev
 ```
 
-**Edit a file directly in GitHub**
+The application will be available at:
+- Frontend: http://localhost:5173
+- Backend API: http://localhost:8000
 
-- Navigate to the desired file(s).
-- Click the "Edit" button (pencil icon) at the top right of the file view.
-- Make your changes and commit the changes.
+## Usage
 
-**Use GitHub Codespaces**
+1. **Sign Up/Sign In**: Create an account or sign in to your existing account
+2. **Speak to Tara**: Click the microphone button and start speaking
+3. **Interrupt Anytime**: Start speaking while Tara is talking to interrupt (barge-in)
+4. **View Your Profile**: Check what Tara has learned about you in the Profile section
+5. **Text Input**: Type messages as an alternative to voice
 
-- Navigate to the main page of your repository.
-- Click on the "Code" button (green button) near the top right.
-- Select the "Codespaces" tab.
-- Click on "New codespace" to launch a new Codespace environment.
-- Edit files directly within the Codespace and commit and push your changes once you're done.
+## Development
 
-## What technologies are used for this project?
+### Backend Structure
 
-This project is built with:
+- `backend/api.py`: FastAPI application with WebSocket endpoint
+- `backend/src/auth.py`: Authentication manager for Supabase
+- `backend/src/stt.py`: Speech-to-text processing
+- `backend/src/llm.py`: AI language model integration
+- `backend/src/tts.py`: Text-to-speech synthesis
+- `backend/src/conversation.py`: Conversation history and user profile management
 
-- Vite
-- TypeScript
-- React
-- shadcn-ui
-- Tailwind CSS
+### Frontend Structure
 
-## How can I deploy this project?
+- `src/components/VoiceAgent.tsx`: Main voice agent component
+- `src/pages`: React Router pages
+- `src/lib`: Utility functions and API services
 
-Simply open [Lovable](https://lovable.dev/projects/e7a43478-cf0f-4589-8e8a-05fdb1d45271) and click on Share -> Publish.
+## Testing
 
-## Can I connect a custom domain to my Lovable project?
+Refer to `backend/TESTING.md` for details on testing procedures and performance benchmarks.
 
-Yes, you can!
+## License
 
-To connect a domain, navigate to Project > Settings > Domains and click Connect Domain.
-
-Read more here: [Setting up a custom domain](https://docs.lovable.dev/tips-tricks/custom-domain#step-by-step-guide)
+This project is licensed under the MIT License.
